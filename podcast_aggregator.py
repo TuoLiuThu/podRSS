@@ -29,17 +29,17 @@ FEEDS = {
     "Invest Like the Best": "https://investlikethebest.libsyn.com/rss",
 }
 
-def get_yesterday_date():
-    """Returns yesterday's date object."""
-    return datetime.date.today() - datetime.timedelta(days=20)
+def get_start_date(days_ago=1):
+    """Returns the date object for 'days_ago' days before today."""
+    return datetime.date.today() - datetime.timedelta(days=days_ago)
 
-def is_published_on_date(entry, target_date):
-    """Checks if the entry was published on the target date."""
+def is_published_since_date(entry, target_date):
+    """Checks if the entry was published on or after the target date."""
     try:
         # parsed_published is a struct_time
         published_time = entry.published_parsed
         published_date = datetime.date(published_time.tm_year, published_time.tm_mon, published_time.tm_mday)
-        return published_date == target_date
+        return published_date >= target_date
     except Exception as e:
         print(f"Error parsing date for entry {entry.get('title', 'Unknown')}: {e}")
         return False
@@ -146,8 +146,12 @@ def send_email(subject, html_content):
 
 def main():
     print("Starting Podcast Aggregator...")
-    yesterday = get_yesterday_date()
-    print(f"Target Date: {yesterday}")
+    # Default is 1 day (yesterday), but changing this variable allows fetching a range.
+    # For normal daily runs, DAYS_TO_CHECK should be 1.
+    DAYS_TO_CHECK = 1
+    start_date = get_start_date(days_ago=DAYS_TO_CHECK)
+
+    print(f"Checking for episodes since: {start_date}")
 
     updates = {}
 
@@ -158,7 +162,7 @@ def main():
             podcast_updates = []
 
             for entry in feed.entries:
-                if is_published_on_date(entry, yesterday):
+                if is_published_since_date(entry, start_date):
                     print(f"  Found new episode: {entry.title}")
 
                     # Clean description (remove html tags if needed, but for now pass as is)
@@ -192,10 +196,10 @@ def main():
     # So we always send an email.
 
     print("Generating report...")
-    html_content = generate_email_content(updates, yesterday)
+    html_content = generate_email_content(updates, start_date)
 
     print("Sending email...")
-    send_email(f"Podcast Daily Update - {yesterday}", html_content)
+    send_email(f"Podcast Daily Update - Since {start_date}", html_content)
     print("Done.")
 
 if __name__ == "__main__":
