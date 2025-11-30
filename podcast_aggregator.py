@@ -31,7 +31,7 @@ FEEDS = {
 
 def get_yesterday_date():
     """Returns yesterday's date object."""
-    return datetime.date.today() - datetime.timedelta(days=5)
+    return datetime.date.today() - datetime.timedelta(days=20)
 
 def is_published_on_date(entry, target_date):
     """Checks if the entry was published on the target date."""
