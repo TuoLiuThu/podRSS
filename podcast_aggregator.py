@@ -31,7 +31,7 @@ FEEDS = {
     "Invest Like the Best": "https://investlikethebest.libsyn.com/rss",
 }
 
-def get_start_date(days_ago=1):
+def get_start_date(days_ago=3):
     """Returns the date object for 'days_ago' days before today."""
     return datetime.date.today() - datetime.timedelta(days=days_ago)
 
